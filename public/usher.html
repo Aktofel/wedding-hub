@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#311f15">
+<title>Passport Control · N&L</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --espresso: #311f15; --cocoa: #68462d; --caramel: #c09874; --sand: #efd3a4;
+    --cream: #f8e8cf; --paper: #fffaf1; --gold: #b8913f; --muted: #7a5c46;
+    --green: #2f7d4a; --green-bg: #e3f3e8; --amber: #a86a12; --amber-bg: #fbefd9;
+    --red: #a83a2c; --red-bg: #f8e1dd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, system-ui, sans-serif; background: var(--cream); color: var(--espresso); min-height: 100vh; }
+  button { font: inherit; cursor: pointer; border: 0; }
+  input { font: inherit; }
+
+  header {
+    background: var(--espresso); color: var(--cream);
+    padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 5;
+  }
+  .brand { font-family: Cinzel, serif; letter-spacing: 0.14em; font-size: 14px; color: var(--sand); }
+  .sub { font-size: 11px; color: var(--caramel); letter-spacing: 0.08em; margin-top: 2px; }
+  .count { text-align: right; }
+  .count b { font-family: Cinzel, serif; font-size: 22px; color: var(--sand); }
+  .count small { display: block; font-size: 11px; color: var(--caramel); }
+
+  .status { font-size: 12px; padding: 6px 16px; text-align: center; background: var(--sand); color: var(--cocoa); }
+  .status.off { background: var(--amber-bg); color: var(--amber); font-weight: 600; }
+
+  main { padding: 16px; max-width: 520px; margin: 0 auto; }
+  .card { background: var(--paper); border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 14px rgba(49,31,21,0.08); }
+  .label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+
+  #reader { width: 100%; border-radius: 12px; overflow: hidden; }
+  #reader video { border-radius: 12px; }
+  .btn { display: block; width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 16px; }
+  .btn.primary { background: var(--espresso); color: var(--cream); }
+  .btn.gold { background: var(--gold); color: #fff; }
+  .btn.ghost { background: transparent; color: var(--cocoa); border: 1.5px solid var(--caramel); }
+  .btn + .btn { margin-top: 10px; }
+
+  .row { display: flex; gap: 8px; }
+  .field { flex: 1; padding: 13px 14px; border-radius: 12px; border: 1.5px solid var(--caramel); background: #fff; font-size: 17px; }
+  .field.code { text-transform: uppercase; letter-spacing: 0.2em; font-family: Cinzel, serif; font-weight: 700; }
+  .row .btn { width: auto; padding: 0 18px; }
+
+  .results { margin-top: 10px; }
+  .hit { display: flex; justify-content: space-between; align-items: center; padding: 12px 4px; border-top: 1px solid #eadcc6; background: none; width: 100%; text-align: left; }
+  .hit:first-child { border-top: 0; }
+  .hit small { color: var(--muted); }
+
+  .result { border-radius: 16px; padding: 18px; margin-bottom: 14px; border: 2px solid; }
+  .result.green { background: var(--green-bg); border-color: var(--green); }
+  .result.amber { background: var(--amber-bg); border-color: var(--amber); }
+  .result.red { background: var(--red-bg); border-color: var(--red); }
+  .stamp { font-family: Cinzel, serif; font-weight: 700; font-size: 20px; letter-spacing: 0.06em; }
+  .green .stamp { color: var(--green); } .amber .stamp { color: var(--amber); } .red .stamp { color: var(--red); }
+  .who { font-size: 20px; font-weight: 700; margin: 8px 0 4px; }
+  .meta { font-size: 14px; color: var(--cocoa); }
+  .note { font-size: 13px; margin-top: 6px; color: var(--muted); }
+
+  .stepper { display: flex; align-items: center; justify-content: center; gap: 18px; margin: 16px 0; }
+  .stepper button { width: 48px; height: 48px; border-radius: 50%; background: var(--espresso); color: var(--cream); font-size: 24px; }
+  .stepper b { font-size: 30px; min-width: 40px; text-align: center; }
+
+  .login { max-width: 360px; margin: 60px auto; text-align: center; }
+  .login h1 { font-family: Cinzel, serif; font-size: 22px; margin-bottom: 6px; }
+  .login p { color: var(--muted); margin-bottom: 18px; }
+  .login .field { text-align: center; letter-spacing: 0.4em; margin-bottom: 12px; width: 100%; }
+  .err { color: var(--red); font-size: 14px; margin-top: 10px; min-height: 18px; }
+  .hidden { display: none !important; }
+  footer { text-align: center; font-size: 12px; color: var(--muted); padding: 10px 0 30px; }
+  footer button { background: none; color: var(--cocoa); text-decoration: underline; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<section id="login" class="login hidden">
+  <h1>Passport Control</h1>
+  <p>Naomi &amp; Lawrence · Usher login</p>
+  <input id="pin" class="field" type="password" inputmode="numeric" maxlength="6" placeholder="PIN">
+  <button id="loginBtn" class="btn primary">Start</button>
+  <div id="loginErr" class="err"></div>
+</section>
+
+<!-- App -->
+<section id="app" class="hidden">
+  <header>
+    <div>
+      <div class="brand">PASSPORT CONTROL</div>
+      <div class="sub">FLIGHT NL 0711 · <span id="who"></span></div>
+    </div>
+    <div class="count"><b id="arrived">0</b><small>of <span id="expected">0</span> on board</small></div>
+  </header>
+  <div id="status" class="status">Connecting…</div>
+
+  <main>
+    <div id="resultBox"></div>
+
+    <div class="card">
+      <div class="label">Scan boarding pass</div>
+      <div id="reader"></div>
+      <button id="scanBtn" class="btn primary" style="margin-top:10px">Start camera</button>
+    </div>
+
+    <div class="card">
+      <div class="label">Booking reference</div>
+      <div class="row">
+        <input id="code" class="field code" maxlength="7" placeholder="K7P2QX" autocomplete="off" autocapitalize="characters">
+        <button id="codeBtn" class="btn primary">Check</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">Search by name</div>
+      <input id="search" class="field" style="width:100%" placeholder="Type a name" autocomplete="off">
+      <div id="results" class="results"></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Not on the list</div>
+      <button id="walkinBtn" class="btn ghost">Record a walk in guest</button>
+    </div>
+
+    <footer>
+      <span id="pending"></span><br>
+      <button id="logout">Log out</button>
+    </footer>
+  </main>
+</section>
+
+<script src="/vendor/html5-qrcode.min.js"></script>
+<script>
+const S = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+
+let session = S.get('wh_session', null);   // { token, name }
+let roster = S.get('wh_roster', { guests: [], walkins: 0 });
+let queue = S.get('wh_queue', []);         // check ins not yet sent
+let online = navigator.onLine;
+let scanner = null;
+let scanning = false;
+let lastScan = { text: '', at: 0 };
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
+const time = (iso) => iso ? new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+
+// Arrivals = what the server knows + what this phone has not sent yet
+function arrivedFor(g) {
+  return g.arrived + queue.filter((q) => q.invitation_id === g.id).reduce((n, q) => n + q.people_count, 0);
+}
+function lastInFor(g) {
+  const mine = queue.filter((q) => q.invitation_id === g.id).map((q) => q.checked_in_at);
+  return mine.length ? mine.at(-1) : g.last_in;
+}
+
+function renderCounts() {
+  const expected = roster.guests.reduce((n, g) => n + g.party, 0);
+  const arrived = roster.guests.reduce((n, g) => n + arrivedFor(g), 0)
+    + roster.walkins + queue.filter((q) => q.method === 'walkin').reduce((n, q) => n + q.people_count, 0);
+  $('arrived').textContent = arrived;
+  $('expected').textContent = expected;
+  $('pending').textContent = queue.length ? `${queue.length} check in(s) waiting to upload` : 'All check ins uploaded';
+  const st = $('status');
+  if (!online) { st.className = 'status off'; st.textContent = 'Offline · check ins are saved on this phone and will upload later'; }
+  else { st.className = 'status'; st.textContent = queue.length ? 'Online · uploading…' : 'Online · up to date'; }
+}
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.token}`, ...(opts.headers || {}) },
+  });
+  if (res.status === 401) { logout(); throw new Error('login'); }
+  if (!res.ok) throw new Error('server');
+  return res.json();
+}
+
+let syncing = false;
+async function sync() {
+  if (!session || syncing) return;
+  syncing = true;
+  try {
+    const items = queue.slice();
+    const data = await api('/api/checkin/sync', { method: 'POST', body: JSON.stringify({ items }) });
+    const sent = new Set(items.map((i) => i.client_id));
+    queue = queue.filter((q) => !sent.has(q.client_id));
+    S.set('wh_queue', queue);
+    roster = { guests: data.guests, walkins: data.walkins };
+    S.set('wh_roster', roster);
+    online = true;
+  } catch (e) {
+    if (e.message !== 'login') online = false;
+  } finally {
+    syncing = false;
+    renderCounts();
+  }
+}
+
+function record(entry) {
+  queue.push({ client_id: uuid(), checked_in_at: new Date().toISOString(), ...entry });
+  S.set('wh_queue', queue);
+  renderCounts();
+  sync();
+}
+
+// ---------- Result cards ----------
+function showGuest(g, method) {
+  const arrived = arrivedFor(g);
+  const left = g.party - arrived;
+  let n = Math.max(left, 1);
+  const box = $('resultBox');
+
+  if (left <= 0) {
+    box.innerHTML = `
+      <div class="result amber">
+        <div class="stamp">ALREADY BOARDED</div>
+        <div class="who">${esc(g.name)}</div>
+        <div class="meta">All ${g.party} on board · last at ${time(lastInFor(g))}</div>
+        ${g.notes ? `<div class="note">${esc(g.notes)}</div>` : ''}
+        <div class="stepper"><button data-d="-1">−</button><b id="n">1</b><button data-d="1">+</button></div>
+        <button class="btn gold" id="go">Let in extra anyway</button>
+        <button class="btn ghost" id="close">Cancel</button>
+      </div>`;
+    n = 1;
+  } else {
+    box.innerHTML = `
+      <div class="result green">
+        <div class="stamp">CLEARED FOR BOARDING</div>
+        <div class="who">${esc(g.name)}</div>
+        <div class="meta">Pass admits ${g.party} · ${arrived ? `${arrived} already in · ` : ''}${left} to board</div>
+        ${g.notes ? `<div class="note">${esc(g.notes)}</div>` : ''}
+        <div class="stepper"><button data-d="-1">−</button><b id="n">${n}</b><button data-d="1">+</button></div>
+        <button class="btn primary" id="go">Board ${n === 1 ? '1 guest' : n + ' guests'}</button>
+        <button class="btn ghost" id="close">Cancel</button>
+      </div>`;
+  }
+
+  const max = left > 0 ? left : 10;
+  box.querySelectorAll('[data-d]').forEach((b) => b.onclick = () => {
+    n = Math.min(max, Math.max(1, n + Number(b.dataset.d)));
+    $('n').textContent = n;
+    if (left > 0) $('go').textContent = `Board ${n === 1 ? '1 guest' : n + ' guests'}`;
+  });
+  $('go').onclick = () => {
+    record({ invitation_id: g.id, people_count: n, method });
+    box.innerHTML = `
+      <div class="result green">
+        <div class="stamp">WELCOME ABOARD</div>
+        <div class="who">${esc(g.name)}</div>
+        <div class="meta">${n} boarded · open seating, please guide them in</div>
+      </div>`;
+    setTimeout(() => { if (box.querySelector('.stamp')?.textContent === 'WELCOME ABOARD') box.innerHTML = ''; }, 4000);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  $('close').onclick = () => { box.innerHTML = ''; };
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showNotFound(what) {
+  $('resultBox').innerHTML = `
+    <div class="result red">
+      <div class="stamp">NOT ON THE PASSENGER LIST</div>
+      <div class="meta" style="margin-top:8px">${esc(what)}</div>
+      <div class="note">Try the name search below, or ask a coordinator before recording a walk in.</div>
+      <button class="btn ghost" style="margin-top:12px" onclick="document.getElementById('resultBox').innerHTML=''">Close</button>
+    </div>`;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ---------- Lookups ----------
+function byCode(input) {
+  const c = norm(input);
+  return roster.guests.find((g) => g.code === c);
+}
+function byQr(text) {
+  const t = String(text || '').trim();
+  const token = t.startsWith('WH:') ? t.slice(3) : (t.match(/\/p\/([A-Za-z0-9_-]+)/) || [])[1];
+  return token ? roster.guests.find((g) => g.token === token) : null;
+}
+
+function onScan(text) {
+  const now = Date.now();
+  if (text === lastScan.text && now - lastScan.at < 4000) return;
+  lastScan = { text, at: now };
+  if (navigator.vibrate) navigator.vibrate(80);
+  const g = byQr(text);
+  g ? showGuest(g, 'qr') : showNotFound('This QR code is not one of our boarding passes.');
+}
+
+async function toggleScan() {
+  if (typeof Html5Qrcode === 'undefined') { alert('Scanner did not load. Use the booking reference instead.'); return; }
+  if (scanning) {
+    await scanner.stop().catch(() => {});
+    scanning = false;
+    $('scanBtn').textContent = 'Start camera';
+    return;
+  }
+  scanner = scanner || new Html5Qrcode('reader');
+  try {
+    await scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 230, height: 230 } }, onScan, () => {});
+    scanning = true;
+    $('scanBtn').textContent = 'Stop camera';
+  } catch {
+    $('resultBox').innerHTML = `<div class="result red"><div class="stamp">CAMERA BLOCKED</div><div class="note">Allow camera access for this site in the browser settings, or use the booking reference.</div></div>`;
+  }
+}
+
+// ---------- Wiring ----------
+$('codeBtn').onclick = () => {
+  const v = $('code').value;
+  if (!norm(v)) return;
+  const g = byCode(v);
+  g ? showGuest(g, 'code') : showNotFound(`No passenger with booking reference ${norm(v)}.`);
+  $('code').value = '';
+};
+$('code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('codeBtn').click(); });
+
+$('search').addEventListener('input', () => {
+  const q = $('search').value.trim().toLowerCase();
+  const box = $('results');
+  if (q.length < 2) { box.innerHTML = ''; return; }
+  const hits = roster.guests.filter((g) => g.name.toLowerCase().includes(q)).slice(0, 8);
+  box.innerHTML = hits.length ? hits.map((g) => `
+    <button class="hit" data-id="${g.id}">
+      <span>${esc(g.name)}</span>
+      <small>${arrivedFor(g)}/${g.party} in</small>
+    </button>`).join('') : '<div class="note">No match</div>';
+  box.querySelectorAll('.hit').forEach((b) => b.onclick = () => {
+    const g = roster.guests.find((x) => x.id === Number(b.dataset.id));
+    $('search').value = ''; box.innerHTML = '';
+    showGuest(g, 'search');
+  });
+});
+
+$('walkinBtn').onclick = () => {
+  $('resultBox').innerHTML = `
+    <div class="result amber">
+      <div class="stamp">WALK IN GUEST</div>
+      <div class="note">Only after a coordinator has said yes.</div>
+      <input id="wname" class="field" style="width:100%;margin-top:12px" placeholder="Name">
+      <div class="stepper"><button data-d="-1">−</button><b id="wn">1</b><button data-d="1">+</button></div>
+      <button class="btn gold" id="wgo">Record walk in</button>
+      <button class="btn ghost" id="wclose">Cancel</button>
+    </div>`;
+  let n = 1;
+  document.querySelectorAll('#resultBox [data-d]').forEach((b) => b.onclick = () => {
+    n = Math.min(20, Math.max(1, n + Number(b.dataset.d))); $('wn').textContent = n;
+  });
+  $('wgo').onclick = () => {
+    const name = $('wname').value.trim();
+    if (!name) { $('wname').focus(); return; }
+    record({ invitation_id: null, people_count: n, method: 'walkin', walkin_name: name });
+    $('resultBox').innerHTML = `<div class="result green"><div class="stamp">WALK IN RECORDED</div><div class="who">${esc(name)}</div><div class="meta">${n} boarded</div></div>`;
+    setTimeout(() => { $('resultBox').innerHTML = ''; }, 3000);
+  };
+  $('wclose').onclick = () => { $('resultBox').innerHTML = ''; };
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+$('scanBtn').onclick = toggleScan;
+
+async function login() {
+  $('loginErr').textContent = '';
+  try {
+    const res = await fetch('/api/staff/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin: $('pin').value }),
+    });
+    const data = await res.json();
+    if (!res.ok) { $('loginErr').textContent = data.error || 'Login failed'; return; }
+    session = { token: data.token, name: data.name };
+    S.set('wh_session', session);
+    start();
+  } catch {
+    $('loginErr').textContent = 'No connection. Connect to the internet to log in the first time.';
+  }
+}
+$('loginBtn').onclick = login;
+$('pin').addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+
+function logout() {
+  if (queue.length && !confirm(`${queue.length} check in(s) have not uploaded yet. Log out anyway? They stay saved on this phone.`)) return;
+  session = null; S.del('wh_session');
+  $('app').classList.add('hidden'); $('login').classList.remove('hidden');
+}
+$('logout').onclick = logout;
+
+window.addEventListener('online', () => { online = true; sync(); });
+window.addEventListener('offline', () => { online = false; renderCounts(); });
+
+function start() {
+  $('login').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  $('who').textContent = (session.name || '').toUpperCase();
+  renderCounts();
+  sync();
+}
+
+setInterval(sync, 15000);
+session ? start() : $('login').classList.remove('hidden');
+</script>
+</body>
+</html>

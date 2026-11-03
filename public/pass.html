@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boarding Pass · Naomi & Lawrence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --espresso: #311f15;
+    --cocoa: #68462d;
+    --caramel: #c09874;
+    --sand: #efd3a4;
+    --cream: #f8e8cf;
+    --paper: #fffaf1;
+    --gold: #b8913f;
+    --ink: #2a1a11;
+    --muted: #7a5c46;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(circle at 50% 0%, #fbf1e1 0%, #ead7bb 100%);
+    font-family: Inter, system-ui, sans-serif;
+    color: var(--ink);
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 40px;
+  }
+  .wrap { width: 100%; max-width: 420px; }
+
+  .pass {
+    background: var(--paper);
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(49, 31, 21, 0.18);
+    border: 1px solid rgba(184, 145, 63, 0.35);
+  }
+
+  .head {
+    background: var(--espresso);
+    color: var(--cream);
+    padding: 18px 22px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .airline { font-family: Cinzel, serif; font-size: 13px; letter-spacing: 0.22em; color: var(--sand); }
+  .flight { font-size: 11px; letter-spacing: 0.14em; color: var(--caramel); margin-top: 3px; }
+  .seal {
+    width: 50px; height: 50px; border-radius: 50%;
+    border: 1.5px solid var(--gold);
+    display: grid; place-items: center;
+    font-family: 'Great Vibes', cursive; font-size: 24px; color: var(--gold);
+  }
+
+  .route {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 22px 22px 8px;
+  }
+  .port .code { font-family: Cinzel, serif; font-size: 34px; font-weight: 700; color: var(--espresso); line-height: 1; }
+  .port .name { font-family: 'Great Vibes', cursive; font-size: 26px; color: var(--cocoa); margin-top: 2px; }
+  .port .country { font-size: 10.5px; letter-spacing: 0.16em; color: var(--muted); text-transform: uppercase; }
+  .port.right { text-align: right; }
+  .plane { width: 92px; color: var(--gold); }
+
+  .title {
+    text-align: center;
+    font-family: Cinzel, serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    padding: 6px 22px 16px;
+  }
+
+  .passenger { padding: 0 22px 18px; }
+  .label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+  .value { font-size: 15px; font-weight: 600; color: var(--ink); margin-top: 3px; }
+  .passenger .value { font-family: Cinzel, serif; font-size: 19px; font-weight: 700; letter-spacing: 0.04em; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px 12px;
+    padding: 0 22px 20px;
+  }
+  .grid .wide { grid-column: span 2; }
+  .seat .value { font-family: Cinzel, serif; font-size: 22px; color: var(--cocoa); }
+
+  .tear {
+    position: relative;
+    height: 26px;
+    background:
+      radial-gradient(circle at 0 50%, transparent 13px, var(--paper) 13.5px) left / 51% 100% no-repeat,
+      radial-gradient(circle at 100% 50%, transparent 13px, var(--paper) 13.5px) right / 51% 100% no-repeat;
+  }
+  .tear::after {
+    content: '';
+    position: absolute; left: 22px; right: 22px; top: 50%;
+    border-top: 2px dashed rgba(192, 152, 116, 0.6);
+  }
+
+  .stub { background: var(--paper); padding: 8px 22px 24px; text-align: center; }
+  .qr {
+    width: 210px; height: 210px; margin: 6px auto 12px;
+    padding: 10px; background: #fff;
+    border-radius: 14px;
+    border: 1px solid rgba(184, 145, 63, 0.4);
+  }
+  .qr img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+  .pnr { font-family: Cinzel, serif; font-size: 30px; font-weight: 700; letter-spacing: 0.18em; color: var(--espresso); margin-top: 4px; }
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+  .palette { display: flex; justify-content: center; gap: 8px; margin-top: 18px; }
+  .palette span { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(104, 70, 45, 0.25); }
+
+  .verse {
+    text-align: center;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--cocoa);
+    font-style: italic;
+    padding: 22px 12px 0;
+  }
+  .verse b { font-style: normal; font-weight: 600; display: block; margin-top: 4px; font-size: 11px; letter-spacing: 0.14em; color: var(--muted); }
+
+  .state { text-align: center; padding: 80px 20px; color: var(--muted); font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="app" class="state">Preparing your boarding pass…</div>
+</div>
+
+<script>
+const PLANE = `
+<svg class="plane" viewBox="0 0 92 40" fill="none" aria-hidden="true">
+  <path d="M4 30 Q46 0 88 30" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 4"/>
+  <g transform="translate(46 13) rotate(0)">
+    <path d="M-9 0 L9 0 M2 -6 L5 0 L2 6 M-6 -3 L-4 0 L-6 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>`;
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function boardingTime(iso) {
+  if (!iso) return 'See programme';
+  const d = new Date(iso);
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Windhoek' });
+}
+
+function render(data) {
+  const ev = data.events.find((e) => e.code === 'hall') || data.events[0] || {};
+  const seat = ev.table_label ? `Table ${esc(ev.table_label)}` : 'Open seating';
+  const people = data.maxPartySize === 1 ? '1 guest' : `${data.maxPartySize} guests`;
+
+  document.getElementById('app').className = '';
+  document.getElementById('app').innerHTML = `
+    <div class="pass">
+      <div class="head">
+        <div>
+          <div class="airline">N &amp; L AIRWAYS</div>
+          <div class="flight">FLIGHT NL 0711 · 07 NOV 2026</div>
+        </div>
+        <div class="seal">N&amp;L</div>
+      </div>
+
+      <div class="route">
+        <div class="port">
+          <div class="code">NAM</div>
+          <div class="name">Naomi</div>
+          <div class="country">Namibia</div>
+        </div>
+        ${PLANE}
+        <div class="port right">
+          <div class="code">RSA</div>
+          <div class="name">Lawrence</div>
+          <div class="country">South Africa</div>
+        </div>
+      </div>
+
+      <div class="title">BOARDING PASS</div>
+
+      <div class="passenger">
+        <div class="label">Passenger</div>
+        <div class="value">${esc(data.household)}</div>
+      </div>
+
+      <div class="grid">
+        <div class="wide">
+          <div class="label">Gate</div>
+          <div class="value">${esc(ev.venue || ev.name || 'Main reception')}</div>
+        </div>
+        <div>
+          <div class="label">Boarding</div>
+          <div class="value">${esc(boardingTime(ev.starts_at))}</div>
+        </div>
+        <div class="seat">
+          <div class="label">Seat</div>
+          <div class="value">${seat}</div>
+        </div>
+        <div>
+          <div class="label">Admits</div>
+          <div class="value">${people}</div>
+        </div>
+        <div>
+          <div class="label">Class</div>
+          <div class="value">Family</div>
+        </div>
+      </div>
+
+      <div class="tear"></div>
+
+      <div class="stub">
+        <div class="label">Scan at passport control</div>
+        <div class="qr"><img src="${esc(data.pass.qrUrl)}" alt="Entry QR code"></div>
+        <div class="label">Booking reference</div>
+        <div class="pnr">${esc(data.pass.backupCode)}</div>
+        <div class="hint">Show this pass at the hall entrance. If the QR code will not scan, the usher can type your booking reference.</div>
+        <div class="palette" title="Dress code colours">
+          <span style="background:#311f15"></span>
+          <span style="background:#68462d"></span>
+          <span style="background:#c09874"></span>
+          <span style="background:#efd3a4"></span>
+          <span style="background:#f8e8cf"></span>
+        </div>
+        <div class="hint" style="margin-top:6px">Dress code colours</div>
+      </div>
+    </div>
+
+    <div class="verse">
+      “So they are no longer two, but one flesh. Therefore what God has joined together, let no one separate.”
+      <b>MARK 10:8–9</b>
+    </div>`;
+}
+
+async function load() {
+  const token = location.pathname.split('/').filter(Boolean).pop();
+  try {
+    const res = await fetch(`/api/i/${encodeURIComponent(token)}`);
+    if (!res.ok) throw new Error('not found');
+    render(await res.json());
+  } catch {
+    document.getElementById('app').textContent = 'We could not find this boarding pass. Please check the link, or ask an usher at the entrance.';
+  }
+}
+load();
+</script>
+</body>
+</html>
