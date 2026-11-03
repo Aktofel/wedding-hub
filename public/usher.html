@@ -230,13 +230,13 @@ function showGuest(g, method) {
       <div class="result amber">
         <div class="stamp">ALREADY BOARDED</div>
         <div class="who">${esc(g.name)}</div>
-        <div class="meta">All ${g.party} on board · last at ${time(lastInFor(g))}</div>
-        ${g.notes ? `<div class="note">${esc(g.notes)}</div>` : ''}
-        <div class="stepper"><button data-d="-1">−</button><b id="n">1</b><button data-d="1">+</button></div>
-        <button class="btn gold" id="go">Let in extra anyway</button>
-        <button class="btn ghost" id="close">Cancel</button>
+        <div class="meta">This pass admits ${g.party === 1 ? '1 guest' : g.party + ' guests'} · all on board · last at ${time(lastInFor(g))}</div>
+        <div class="note">No more entries on this pass. Please ask a coordinator.</div>
+        <button class="btn ghost" id="close" style="margin-top:12px">Close</button>
       </div>`;
-    n = 1;
+    $('close').onclick = () => { box.innerHTML = ''; };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
   } else {
     box.innerHTML = `
       <div class="result green">
@@ -250,11 +250,11 @@ function showGuest(g, method) {
       </div>`;
   }
 
-  const max = left > 0 ? left : 10;
+  const max = left;
   box.querySelectorAll('[data-d]').forEach((b) => b.onclick = () => {
     n = Math.min(max, Math.max(1, n + Number(b.dataset.d)));
     $('n').textContent = n;
-    if (left > 0) $('go').textContent = `Board ${n === 1 ? '1 guest' : n + ' guests'}`;
+    $('go').textContent = `Board ${n === 1 ? '1 guest' : n + ' guests'}`;
   });
   $('go').onclick = () => {
     record({ invitation_id: g.id, people_count: n, method });

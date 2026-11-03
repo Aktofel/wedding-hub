@@ -55,10 +55,23 @@ router.post('/sync', async (req, res) => {
   const items = Array.isArray(req.body?.items) ? req.body.items.slice(0, 500) : [];
 
   for (const it of items) {
-    const count = parseInt(it.people_count, 10);
+    let count = parseInt(it.people_count, 10);
     if (!it.client_id || !(count > 0)) continue;
     const method = ['qr', 'code', 'search', 'walkin'].includes(it.method) ? it.method : 'search';
     try {
+      // Never let a pass admit more people than it allows, even if two ushers scan it at once
+      if (method !== 'walkin') {
+        const { rows } = await query(
+          `SELECT i.max_party_size AS party,
+                  COALESCE((SELECT sum(people_count) FROM checkins
+                             WHERE invitation_id = i.id AND event_id = $2 AND client_id <> $3), 0)::int AS arrived
+             FROM invitations i WHERE i.id = $1`,
+          [it.invitation_id, eventId, it.client_id]
+        );
+        if (!rows.length) continue;
+        count = Math.min(count, rows[0].party - rows[0].arrived);
+        if (count <= 0) continue;
+      }
       await query(
         `INSERT INTO checkins (client_id, invitation_id, event_id, people_count, method, walkin_name, staff_id, checked_in_at)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
